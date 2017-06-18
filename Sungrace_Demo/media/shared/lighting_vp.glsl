@@ -1,8 +1,9 @@
 #version 150
 
 uniform vec4 posLight;
-uniform mat4 matWorldViewProj;
 uniform vec4 posEye;
+uniform mat4 matWorldViewProj;
+uniform mat4 matWorld;
 
 in vec4 vertex;
 in vec3 normal;
@@ -18,7 +19,7 @@ void main()
 {
 	gl_Position = matWorldViewProj * vertex;
 	
-	oPos = vertex;
+	oPos = matWorld * vertex;
 	oNormal = normal;
 	oUv0 = uv0;
 	

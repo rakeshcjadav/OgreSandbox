@@ -73,9 +73,6 @@ bool CApplication::Init()
 	ResourceGroupManager::getSingleton().addResourceLocation(GetMediaPath() + "cubenew", "FileSystem", "cubenew", false);
 	ResourceGroupManager::getSingleton().initialiseResourceGroup("cubenew");
 
-	ResourceGroupManager::getSingleton().addResourceLocation(GetMediaPath() + "ogrehead", "FileSystem", "ogrehead", false);
-	ResourceGroupManager::getSingleton().initialiseResourceGroup("ogrehead");
-
 	ResourceGroupManager::getSingleton().addResourceLocation(GetMediaPath() + "ground", "FileSystem", "ground", false);
 	ResourceGroupManager::getSingleton().initialiseResourceGroup("ground");
 
@@ -97,68 +94,62 @@ void CApplication::Run()
 
 void CApplication::CreateScene()
 {
-	m_pSceneManager->setAmbientLight(ColourValue(0.2, 0.2, 0.2)); 
+	m_pSceneManager->setAmbientLight(ColourValue(0.2, 0.2, 0.2));
 
 	Ogre::SceneNode * pNode = nullptr;
 	Light * light = nullptr;
 
-	pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0.0f, 50.0f, 0.0f));
-	Entity * head = m_pSceneManager->createEntity("cube", "cube.mesh");
-	head->setRenderQueueGroupAndPriority(RENDER_QUEUE_MAIN, 1);
-	head->getSubEntity(0)->setVisible(false);
-	pNode->attachObject(head);
+	CreateCube(Ogre::Vector3(0.0f, 50.05f, 0.0f));
+	CreateCube(Ogre::Vector3(0.0f, 150.10f, 0.0f), true);
+	CreateCube(Ogre::Vector3(100.05f, 50.05f, 0.0f), true);
+	CreateCube(Ogre::Vector3(100.05f, 150.10f, 0.0f), true);
 
-	pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0.0f, 150.0f, 0.0f));
-	Entity * head1 = m_pSceneManager->createEntity("cube1", "cube.mesh");
-	head1->setRenderQueueGroupAndPriority(RENDER_QUEUE_MAIN, 2);
-	head1->getSubEntity(0)->setVisible(false);
-	pNode->attachObject(head1);
-
-	pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(100.0f, 50.0f, 0.0f));
-	Entity * head2 = m_pSceneManager->createEntity("cube2", "cube.mesh");
-	head2->setRenderQueueGroupAndPriority(RENDER_QUEUE_MAIN, 3);
-	pNode->attachObject(head2);
-
-	pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(100.0f, 150.0f, 0.0f));
-	Entity * head3 = m_pSceneManager->createEntity("cube3", "cube.mesh");
-	head3->getSubEntity(0)->setVisible(false);
-	head3->setRenderQueueGroupAndPriority(RENDER_QUEUE_MAIN, 4);
-	pNode->attachObject(head3);
-	
-	
-	pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(300.0f, 200.0f, 200.0f));
+	pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(300.f, 50.0f, 200.0f));
 	light = m_pSceneManager->createLight();
 	light->setDiffuseColour(Ogre::ColourValue(0.4f, 0.7f, 0.4f, 1.0f));
-	light->setSpecularColour(Ogre::ColourValue(0.03f, 0.03f, 0.03f, 1.0f));
+	light->setSpecularColour(Ogre::ColourValue(0.04f, 0.07f, 0.04f, 1.0f));
 	light->setType(Light::LT_POINT);
-	light->setAttenuation(500, 1.0, 0.045, 0.0075);
+	//light->setAttenuation(50, 1.0, 0.045, 0.0075);
 	pNode->attachObject(light); 
 
-	pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(-300.0f, 100.0f, 200.0f));
+	pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(-300.0f, 250.0f, 200.0f));
 	light = m_pSceneManager->createLight();
-	light->setDiffuseColour(Ogre::ColourValue(0.8f, 0.4f, 0.4f, 1.0f));
-	light->setSpecularColour(Ogre::ColourValue(0.01f, 0.0f, 0.0f, 1.0f));
+	light->setDiffuseColour(Ogre::ColourValue(0.7f, 0.4f, 0.4f, 1.0f));
+	light->setSpecularColour(Ogre::ColourValue(0.0f, 0.0f, 0.0f, 1.0f));
 	light->setType(Light::LT_POINT);
-	light->setAttenuation(300, 1.0, 0.045, 0.0075);
+	//light->setAttenuation(400, 1.0, 0.045, 0.0075);
 	pNode->attachObject(light);
 
 	pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(00.0f, 200.0f, -50.0f));
 	light = m_pSceneManager->createLight();
-	light->setDiffuseColour(Ogre::ColourValue(0.2f, 0.2f, 0.9f, 1.0f));
+	light->setDiffuseColour(Ogre::ColourValue(0.2f, 0.2f, 0.5f, 1.0f));
 	light->setSpecularColour(Ogre::ColourValue(0.0f, 0.0f, 0.0f, 1.0f));
 	light->setType(Light::LT_POINT);
-	light->setAttenuation(500, 1.0, 0.045, 0.0075);
+	//light->setAttenuation(300, 1.0, 0.045, 0.0075);
 	pNode->attachObject(light);
 
 	pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0.0, 0.0f, 0.0f));
 	Entity * ground = m_pSceneManager->createEntity("ground", "ground.mesh");
 	ground->setRenderQueueGroupAndPriority(RENDER_QUEUE_MAIN, 1);
+	pNode->setScale(100.0f, 1.0f, 100.0f);
 	pNode->attachObject(ground);
+}
 
-	//pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0.0, 100.0f, 200.0f));
-	//Entity * ogrehead = m_pSceneManager->createEntity("ogrehead", "ogrehead.mesh");
-	//ogrehead->setRenderQueueGroupAndPriority(RENDER_QUEUE_MAIN, 1);
-	//pNode->attachObject(ogrehead);
+void CApplication::CreateCube(const Ogre::Vector3 & vPos, bool bHideFrontFace)
+{
+	static int iIndex = 0;
+	
+	char szEntityName[100];
+	sprintf_s(szEntityName, "cube_%d", iIndex++);
+	Ogre::String strEntityName(szEntityName);
+
+	Ogre::SceneNode * pNode = nullptr;
+	pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(vPos);
+	Entity * cube = m_pSceneManager->createEntity(strEntityName, "cube.mesh");
+	if(bHideFrontFace)
+		cube->getSubEntity(0)->setVisible(false);
+	cube->setRenderQueueGroup(RENDER_QUEUE_MAIN);
+	pNode->attachObject(cube);
 }
 
 Ogre::String CApplication::GetMediaPath()

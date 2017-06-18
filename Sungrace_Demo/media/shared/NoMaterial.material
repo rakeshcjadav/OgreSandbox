@@ -57,8 +57,9 @@ material NoMaterial
 			vertex_program_ref Light_VP
 			{
 				param_named_auto matWorldViewProj worldviewproj_matrix
-				param_named_auto posLight light_position_object_space 0
-				param_named_auto posEye camera_position_object_space
+				param_named_auto matWorld world_matrix
+				param_named_auto posLight light_position 0
+				param_named_auto posEye camera_position
 			}
 
 			fragment_program_ref Light_FP
@@ -68,8 +69,8 @@ material NoMaterial
 			}
 		}
 		
-		// Decal pass
-		pass decal
+		// Diffuse pass
+		pass diffuse
 		{
 			lighting off
 
@@ -87,7 +88,7 @@ material NoMaterial
 			
 			texture_unit DiffuseMap
 			{
-				texture logo_4by3.jpg 2d
+				texture border_rect.png 2d
 				tex_coord_set 0
 				tex_address_mode border
 				filtering linear linear linear

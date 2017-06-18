@@ -13,14 +13,18 @@ out vec4 oColor;
 
 void main()
 {
-	vec3 N = normalize(oNormal);
- 
-    vec3 EyeDir = normalize(oPosEye.xyz - oPos.xyz);
-    vec3 LightDir = normalize(oPosLight.xyz -  (oPos.xyz * oPosLight.w));
-    vec3 HalfAngle = normalize(LightDir + EyeDir);
- 
-	float diffuse = dot(LightDir, N);
-	float specular = pow(dot(HalfAngle, N), 127);
-
-	oColor = lightDiffuse * diffuse + lightSpecular * specular;
+	// diffuse
+	vec3 norm = normalize(oNormal);
+    vec3 lightDir = normalize(oPosLight.xyz - oPos.xyz);
+    float diff = max(dot(norm, lightDir), 0.0);
+    vec3 diffuse = diff * lightDiffuse.rgb;
+	
+	// specular
+    float specularStrength = 1.0;
+    vec3 viewDir = normalize(oPosEye.xyz - oPos.xyz);
+    vec3 reflectDir = reflect(-lightDir, norm);  
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 20);
+    vec3 specular = specularStrength * spec * lightSpecular.rgb;  
+	
+	oColor = vec4(diffuse + specular, 1.0);	
 }
