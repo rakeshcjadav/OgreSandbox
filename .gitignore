@@ -1,0 +1,5 @@
+/Sungrace_Demo/Temp
+/Sungrace_Demo/Release
+/Sungrace_Demo/Debug
+/Sungrace_Demo/*.opendb
+/Sungrace_Demo/*.db
