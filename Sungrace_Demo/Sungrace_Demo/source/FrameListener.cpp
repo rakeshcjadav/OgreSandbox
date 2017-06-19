@@ -88,7 +88,7 @@ bool CFrameListener::frameRenderingQueued(const FrameEvent& evt)
 	if (mTranslateVector == Ogre::Vector3::ZERO)
 	{
 		// decay (one third speed)
-		mCurrentSpeed -= evt.timeSinceLastFrame * 0.3;
+		mCurrentSpeed -= evt.timeSinceLastFrame * 0.3f;
 		mTranslateVector = lastMotion;
 	}
 	else
@@ -186,13 +186,13 @@ bool CFrameListener::ProcessUnbufferedMouseInput(const FrameEvent& evt)
 	const OIS::MouseState &ms = m_pMouse->getMouseState();
 	if (ms.buttonDown(OIS::MB_Right))
 	{
-		mTranslateVector.x += ms.X.rel * 0.13;
-		mTranslateVector.y -= ms.Y.rel * 0.13;
+		mTranslateVector.x += ms.X.rel * 0.13f;
+		mTranslateVector.y -= ms.Y.rel * 0.13f;
 	}
 	else
 	{
-		mRotX = Degree(-ms.X.rel * 0.13);
-		mRotY = Degree(-ms.Y.rel * 0.13);
+		mRotX = Degree(-ms.X.rel * 0.13f);
+		mRotY = Degree(-ms.Y.rel * 0.13f);
 	}
 
 	return true;

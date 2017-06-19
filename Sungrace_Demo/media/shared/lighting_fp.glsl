@@ -15,7 +15,13 @@ void main()
 {
 	// diffuse
 	vec3 norm = normalize(oNormal);
-    vec3 lightDir = normalize(oPosLight.xyz - oPos.xyz);
+	vec3 lightDir = vec3(1.0);
+	
+	// For "Directional light" forth component in light position is set 0.0
+	if(oPosLight.w == 0.0)
+		lightDir = oPosLight.xyz;
+	else
+		lightDir = normalize(oPosLight.xyz - oPos.xyz);
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diff * lightDiffuse.rgb;
 	

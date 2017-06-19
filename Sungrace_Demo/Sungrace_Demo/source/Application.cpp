@@ -2,8 +2,10 @@
 #include "Application.h"
 #include "FrameListener.h"
 
-CApplication::CApplication()
+CApplication::CApplication(bool _bSunLight, bool _bPointLights)
 {
+	m_bSunLight = _bSunLight;
+	m_bPointLights = _bPointLights;
 }
 
 CApplication::~CApplication()
@@ -59,7 +61,7 @@ bool CApplication::Init()
 
 	// Create one viewport, entire window
 	Viewport * pViewport = m_pRenderWindow->addViewport(m_pCamera);
-	pViewport->setBackgroundColour(Ogre::ColourValue(0.0, 0.0, 0.10));
+	pViewport->setBackgroundColour(Ogre::ColourValue(0.0f, 0.0f, 0.10f));
 
 	// Alter the camera aspect ratio to match the viewport
 	m_pCamera->setAspectRatio(Real(pViewport->getActualWidth()) / Real(pViewport->getActualHeight()));
@@ -94,7 +96,7 @@ void CApplication::Run()
 
 void CApplication::CreateScene()
 {
-	m_pSceneManager->setAmbientLight(ColourValue(0.2, 0.2, 0.2));
+	m_pSceneManager->setAmbientLight(ColourValue(0.2f, 0.2f, 0.2f));
 
 	Ogre::SceneNode * pNode = nullptr;
 	Light * light = nullptr;
@@ -104,31 +106,43 @@ void CApplication::CreateScene()
 	CreateCube(Ogre::Vector3(100.05f, 50.05f, 0.0f), true);
 	CreateCube(Ogre::Vector3(100.05f, 150.10f, 0.0f), true);
 
-	pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(300.f, 50.0f, 200.0f));
-	light = m_pSceneManager->createLight();
-	light->setDiffuseColour(Ogre::ColourValue(0.4f, 0.7f, 0.4f, 1.0f));
-	light->setSpecularColour(Ogre::ColourValue(0.04f, 0.07f, 0.04f, 1.0f));
-	light->setType(Light::LT_POINT);
-	//light->setAttenuation(50, 1.0, 0.045, 0.0075);
-	pNode->attachObject(light); 
+	if (m_bSunLight)
+	{
+		light = m_pSceneManager->createLight();
+		light->setDiffuseColour(Ogre::ColourValue(0.3f, 0.3f, 0.2f, 1.0f));
+		light->setPosition(Ogre::Vector3(0.0f, 100.0f, 0.0f));
+		light->setDirection(Ogre::Vector3(-1.0f, -1.0f, 0.5f));
+		light->setType(Light::LT_DIRECTIONAL);
+	}
+	
+	if (m_bPointLights)
+	{
+		pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(300.f, 50.0f, 200.0f));
+		light = m_pSceneManager->createLight();
+		light->setDiffuseColour(Ogre::ColourValue(0.3f, 0.6f, 0.3f, 1.0f));
+		light->setSpecularColour(Ogre::ColourValue(0.03f, 0.06f, 0.03f, 1.0f));
+		light->setType(Light::LT_POINT);
+		light->setAttenuation(300.f, 1.0f, 0.045f, 0.0075f);
+		pNode->attachObject(light);
 
-	pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(-300.0f, 250.0f, 200.0f));
-	light = m_pSceneManager->createLight();
-	light->setDiffuseColour(Ogre::ColourValue(0.7f, 0.4f, 0.4f, 1.0f));
-	light->setSpecularColour(Ogre::ColourValue(0.0f, 0.0f, 0.0f, 1.0f));
-	light->setType(Light::LT_POINT);
-	//light->setAttenuation(400, 1.0, 0.045, 0.0075);
-	pNode->attachObject(light);
+		pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(-300.0f, 250.0f, 200.0f));
+		light = m_pSceneManager->createLight();
+		light->setDiffuseColour(Ogre::ColourValue(0.5f, 0.3f, 0.3f, 1.0f));
+		light->setSpecularColour(Ogre::ColourValue(0.0f, 0.0f, 0.0f, 1.0f));
+		light->setType(Light::LT_POINT);
+		light->setAttenuation(400.f, 1.0f, 0.045f, 0.0075f);
+		pNode->attachObject(light);
 
-	pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(00.0f, 200.0f, -50.0f));
-	light = m_pSceneManager->createLight();
-	light->setDiffuseColour(Ogre::ColourValue(0.2f, 0.2f, 0.5f, 1.0f));
-	light->setSpecularColour(Ogre::ColourValue(0.0f, 0.0f, 0.0f, 1.0f));
-	light->setType(Light::LT_POINT);
-	//light->setAttenuation(300, 1.0, 0.045, 0.0075);
-	pNode->attachObject(light);
+		pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(00.0f, 200.0f, -50.0f));
+		light = m_pSceneManager->createLight();
+		light->setDiffuseColour(Ogre::ColourValue(0.2f, 0.2f, 0.5f, 1.0f));
+		light->setSpecularColour(Ogre::ColourValue(0.0f, 0.0f, 0.0f, 1.0f));
+		light->setType(Light::LT_POINT);
+		light->setAttenuation(500.f, 1.0f, 0.45f, 0.75f);
+		pNode->attachObject(light);
+	}
 
-	pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0.0, 0.0f, 0.0f));
+	pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0.0f, 0.0f, 0.0f));
 	Entity * ground = m_pSceneManager->createEntity("ground", "ground.mesh");
 	ground->setRenderQueueGroupAndPriority(RENDER_QUEUE_MAIN, 1);
 	pNode->setScale(100.0f, 1.0f, 100.0f);

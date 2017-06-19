@@ -6,7 +6,7 @@ class CFrameListener;
 class CApplication
 {
 public:
-									CApplication();
+									CApplication(bool _bSunLight, bool _bPointLights);
 									~CApplication();
 	bool							Init();
 	void							Run();
@@ -24,5 +24,8 @@ private:
 	Ogre::SceneManager *			m_pSceneManager;
 
 	CFrameListener *				m_pFrameListener;
+
+	bool							m_bSunLight;
+	bool							m_bPointLights;
 };
 
