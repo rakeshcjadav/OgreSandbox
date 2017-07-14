@@ -4,6 +4,7 @@ uniform vec4 posLight;
 uniform vec4 posEye;
 uniform mat4 matWorldViewProj;
 uniform mat4 matWorld;
+uniform mat4 matInverseView;
 
 in vec4 vertex;
 in vec3 normal;
@@ -20,6 +21,8 @@ void main()
 	gl_Position = matWorldViewProj * vertex;
 	
 	oPos = matWorld * vertex;
+	oPos = oPos/vec4(oPos.w);
+	
 	oNormal = normal;
 	oUv0 = uv0;
 	
