@@ -13,7 +13,7 @@ public:
 
 private:
 	void							CreateScene();
-	void							CreateCube(const Ogre::Vector3 & vPos, bool bHideFrontFace = false);
+	void							CreateCube(const Ogre::Vector3 & vPos, bool bHideFrontFace = false, float fAlpha = 1.0f);
 	Ogre::String					GetMediaPath();
 
 private:

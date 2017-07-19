@@ -1,0 +1,22 @@
+material cubemapping
+{
+	technique
+	{
+		// Diffuse pass
+		pass diffuse
+		{
+			lighting off
+			//scene_blend one zero
+			//cull_hardware none
+			//depth_write off
+			
+			texture_unit EnvMap
+			{
+				cubic_texture env1/cloudy_noon.jpg combinedUVW
+				tex_address_mode clamp
+				env_map cubic_reflection
+				filtering linear linear linear
+			}
+		}
+	}
+}

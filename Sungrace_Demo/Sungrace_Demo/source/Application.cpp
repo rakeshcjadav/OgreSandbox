@@ -80,6 +80,15 @@ bool CApplication::Init()
 
 	CreateScene();
 
+	// shadow params
+	m_pSceneManager->setShadowTechnique(Ogre::SHADOWTYPE_TEXTURE_ADDITIVE_INTEGRATED);
+	m_pSceneManager->setShadowCasterRenderBackFaces(false);
+	m_pSceneManager->setShadowTexturePixelFormat(Ogre::PF_FLOAT32_RGB);
+	m_pSceneManager->setShadowTextureCasterMaterial("Ogre/DepthShadowmap/Caster/Float");
+	m_pSceneManager->setShadowTextureReceiverMaterial("Ogre/DepthShadowmap/Receiver/Float");
+	m_pSceneManager->setShadowTextureSelfShadow(true);
+	m_pSceneManager->setShadowTextureSize(1024);
+
 	m_pFrameListener = new CFrameListener(m_pRenderWindow, m_pCamera);
 	m_pRoot->addFrameListener(m_pFrameListener);
 
@@ -97,7 +106,7 @@ void CApplication::Run()
 void CApplication::CreateScene()
 {
 	if (m_bSunLight || m_bPointLights)
-		m_pSceneManager->setAmbientLight(ColourValue(0.10f, 0.10f, 0.10f));
+		m_pSceneManager->setAmbientLight(ColourValue(1.0f, 1.0f, 1.0f));
 	else
 		m_pSceneManager->setAmbientLight(ColourValue(1.0f, 1.0f, 1.0f));
 
@@ -108,12 +117,13 @@ void CApplication::CreateScene()
 	CreateCube(Ogre::Vector3(0.0f, 150.0f, 0.0f));
 	CreateCube(Ogre::Vector3(100.0f, 50.0f, 0.0f));
 	CreateCube(Ogre::Vector3(100.0f, 150.0f, 0.0f));
+	CreateCube(Ogre::Vector3(-250.0f, 50.0f, 250.0f), false, 0.2f);
 
 	if (m_bSunLight)
 	{
 		light = m_pSceneManager->createLight();
 		light->setDiffuseColour(Ogre::ColourValue(0.37f, 0.37f, 0.4f, 1.0f));
-		light->setSpecularColour(Ogre::ColourValue(0.0f, 0.0f, 0.0f, 0.0f));
+		light->setSpecularColour(Ogre::ColourValue(0.02f, 0.02f, 0.03f, 0.0f));
 		light->setPosition(Ogre::Vector3(0.0f, 100.0f, 0.0f));
 		light->setDirection(Ogre::Vector3(1.0f, -1.0f, -1.0f));
 		light->setType(Light::LT_DIRECTIONAL);
@@ -121,29 +131,31 @@ void CApplication::CreateScene()
 	
 	if (m_bPointLights)
 	{
-		
 		light = m_pSceneManager->createLight();
-		light->setPosition(Ogre::Vector3(200.f, 300.0f, -200.0f));
-		light->setDiffuseColour(Ogre::ColourValue(0.2f, 0.8f, 0.2f, 1.0f));
+		light->setPosition(Ogre::Vector3(150.f, 100.0f, 150.0f));
+		light->setDiffuseColour(Ogre::ColourValue(1.0f, 1.0f, 1.0f, 1.0f));
 		light->setSpecularColour(Ogre::ColourValue(1.0f, 1.0f, 1.0f, 1.0f));
 		light->setType(Light::LT_POINT);
-		light->setAttenuation(1000.f, 1.0f, 0.045f, 0.0075f);
+		light->setAttenuation(500.f, 1.0f, 0.009f, 0.0009f);
 		light->setCastShadows(true);
 		
 		light = m_pSceneManager->createLight();
-		light->setPosition(Ogre::Vector3(-300.0f, 250.0f, 200.0f));
-		light->setDiffuseColour(Ogre::ColourValue(0.4f, 0.3f, 0.3f, 1.0f));
+		light->setPosition(Ogre::Vector3(-150.0f, 300.0f, -200.0f));
+		light->setDiffuseColour(Ogre::ColourValue(1.0f, 1.0f, 1.0f, 1.0f));
 		light->setSpecularColour(Ogre::ColourValue(1.0f, 1.0f, 1.0f, 1.0f));
 		light->setType(Light::LT_POINT);
-		light->setAttenuation(800.f, 1.0f, 0.045f, 0.0075f);
+		light->setAttenuation(700.f, 1.0f, 0.005f, 0.0002f);
 
+		/*
 		light = m_pSceneManager->createLight();
-		light->setPosition(Ogre::Vector3(00.0f, 200.0f, -50.0f));
-		light->setDiffuseColour(Ogre::ColourValue(0.2f, 0.2f, 0.5f, 1.0f));
-		light->setSpecularColour(Ogre::ColourValue(0.0f, 0.0f, 0.0f, 1.0f));
-		light->setType(Light::LT_POINT);
-		light->setAttenuation(300.f, 1.0f, 0.45f, 0.75f);
-		
+		light->setPosition(Ogre::Vector3(-250.0f, 100.0f, 250.0f));
+		light->setDirection(Ogre::Vector3(0.0f, -1.0f, 0.0f));
+		light->setDiffuseColour(Ogre::ColourValue(0.5f, 0.5f, 0.7f, 1.0f));
+		light->setSpecularColour(Ogre::ColourValue(1.0f, 1.0f, 1.0f, 1.0f));
+		light->setCastShadows(true);
+		light->setType(Light::LT_SPOTLIGHT);
+		light->setAttenuation(500.f, 1.0f, 0.45f, 0.075f);
+		light->setSpotlightRange(Ogre::Radian(Ogre::Degree(0.0f)), Ogre::Radian(Ogre::Degree(90.0f)), 1.0f); */
 	}
 
 	pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(0.0f, 0.0f, 0.0f));
@@ -156,18 +168,51 @@ void CApplication::CreateScene()
 	{
 		mat = matBase->clone("groundplane_material");
 		params = mat->getTechnique(0)->getPass("ambient")->getFragmentProgramParameters();
+		params->setNamedConstant("ambient", Ogre::ColourValue(0.1f, 0.1f, 0.1f, 1.0f));
+
+		params = mat->getTechnique(0)->getPass("lighting")->getFragmentProgramParameters();
+		params->setNamedConstant("diffuse", Ogre::ColourValue(1.0f, 1.0f, 1.0f, 1.0f));
+		params->setNamedConstant("specular", Ogre::ColourValue(1.0f, 1.0f, 1.0f, 0.0f));
+		params->setNamedConstant("reflection", 0.0f);
+
+		params = mat->getTechnique(0)->getPass("diffuse")->getFragmentProgramParameters();
+		params->setNamedConstant("reflection", 0.0f);
+
+		params = mat->getTechnique(0)->getPass("environment")->getFragmentProgramParameters();
+		params->setNamedConstant("reflection", 0.0f);
+	}
+	ground->setMaterialName("groundplane_material");
+	pNode->setScale(100.0f, 1.0f, 100.0f);
+	pNode->attachObject(ground);
+
+	pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(Ogre::Vector3(300.0f, 100.0f, 0.0f));
+	Entity * sphere = m_pSceneManager->createEntity("sphere", Ogre::SceneManager::PrefabType::PT_SPHERE);
+	sphere->setRenderQueueGroupAndPriority(RENDER_QUEUE_MAIN, 1);
+	/*
+	Ogre::MaterialPtr matBase = Ogre::MaterialManager::getSingleton().getByName("NoMaterial");
+	Ogre::MaterialPtr mat;
+	Ogre::GpuProgramParametersSharedPtr params;
+	if (!matBase.isNull())
+	{
+		mat = matBase->clone("groundplane_material");
+		params = mat->getTechnique(0)->getPass("ambient")->getFragmentProgramParameters();
 		params->setNamedConstant("ambient", Ogre::ColourValue(1.0f, 1.0f, 1.0f, 1.0f));
 
 		params = mat->getTechnique(0)->getPass("lighting")->getFragmentProgramParameters();
 		params->setNamedConstant("diffuse", Ogre::ColourValue(1.0f, 1.0f, 1.0f, 1.0f));
 		params->setNamedConstant("specular", Ogre::ColourValue(1.0f, 1.0f, 1.0f, 0.0f));
+
+		params = mat->getTechnique(0)->getPass("diffuse")->getFragmentProgramParameters();
+		params->setNamedConstant("Reflection", 0.0f);
 	}
-	ground->setMaterialName("groundplane_material");
-	pNode->setScale(100.0f, 1.0f, 100.0f);
-	pNode->attachObject(ground);
+	*/
+	Ogre::MaterialPtr matf = Ogre::MaterialManager::getSingleton().getByName("cubemapping");
+	sphere->setMaterialName("cubemapping");
+	//pNode->setScale(10.0f, 10.0f, 10.0f);
+	pNode->attachObject(sphere);
 }
 
-void CApplication::CreateCube(const Ogre::Vector3 & vPos, bool bHideFrontFace)
+void CApplication::CreateCube(const Ogre::Vector3 & vPos, bool bHideFrontFace, float fAlpha)
 {
 	static int iIndex = 0;
 	
@@ -182,8 +227,8 @@ void CApplication::CreateCube(const Ogre::Vector3 & vPos, bool bHideFrontFace)
 	Ogre::SceneNode * pNode = nullptr;
 	pNode = m_pSceneManager->getRootSceneNode()->createChildSceneNode(vPos);
 	
-	Entity * cube = m_pSceneManager->createEntity(strEntityName, "cube.mesh");
-	//Entity * cube = m_pSceneManager->createEntity(strEntityName, Ogre::SceneManager::PrefabType::PT_SPHERE); //
+	//Entity * cube = m_pSceneManager->createEntity(strEntityName, "cube.mesh");
+	Entity * cube = m_pSceneManager->createEntity(strEntityName, Ogre::SceneManager::PrefabType::PT_SPHERE); //
 	if(bHideFrontFace)
 		cube->getSubEntity(0)->setVisible(false);
 	cube->setRenderQueueGroup(RENDER_QUEUE_MAIN);
@@ -194,29 +239,41 @@ void CApplication::CreateCube(const Ogre::Vector3 & vPos, bool bHideFrontFace)
 	{
 		mat = matBase->clone(strMaterialName);
 		Ogre::GpuProgramParametersSharedPtr paramsFirstPass = mat->getTechnique(0)->getPass("ambient")->getFragmentProgramParameters();
-		paramsFirstPass->setNamedConstant("ambient", Ogre::ColourValue(1.0f, 1.0f, 1.0f, 1.0f));
+		paramsFirstPass->setNamedConstant("ambient", Ogre::ColourValue(0.24725f, 0.1995f, 0.0745f, 1.0f));
 
 		Ogre::GpuProgramParametersSharedPtr paramsSecondPass = mat->getTechnique(0)->getPass("lighting")->getFragmentProgramParameters();
-		paramsSecondPass->setNamedConstant("diffuse", Ogre::ColourValue(1.0f, 1.0f, 1.0f, 1.0f));
-		paramsSecondPass->setNamedConstant("specular", Ogre::ColourValue(1.0f, 1.0f, 1.0f, 0.0f));
-		paramsSecondPass->setNamedConstant("specularStrength", 0.5f);
+		paramsSecondPass->setNamedConstant("diffuse", Ogre::ColourValue(0.75164f, 0.60648f, 0.22648f, 1.0f));
+		paramsSecondPass->setNamedConstant("specular", Ogre::ColourValue(0.628281f, 0.555802f, 0.366065f, 1.4f));
+		paramsSecondPass->setNamedConstant("specularStrength", 0.13f);
 
 		Ogre::GpuProgramParametersSharedPtr paramsThirdPass = mat->getTechnique(0)->getPass("diffuse")->getFragmentProgramParameters();
+		mat->getTechnique(0)->getPass("diffuse")->getTextureUnitState("DiffuseMap")->setTextureName("white_bg_1080p.jpg");
 
-		float alpha = 0.20;
-		if (iIndex % 3 == 0)
+		Ogre::GpuProgramParametersSharedPtr paramsFourthPass = mat->getTechnique(0)->getPass("environment")->getFragmentProgramParameters();
+		
+		float alpha = fAlpha;
+		float reflection = 0.01f;
+		//if (iIndex % 3 == 0)
 		{
-			if (alpha < 1.0)
+			if (alpha < 1.0f)
 			{
 				mat->getTechnique(0)->getPass(0)->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-				mat->setDepthWriteEnabled(false);
+				mat->getTechnique(0)->getPass(0)->setDepthWriteEnabled(false);
+				//mat->setCullingMode(Ogre::CULL_NONE);
 			}
 			paramsFirstPass->setNamedConstant("alpha", alpha);
 
-			paramsSecondPass->setNamedConstant("specular", Ogre::ColourValue(1.0f, 1.0f, 1.0f, 140.0f));
+			paramsSecondPass->setNamedConstant("specular", Ogre::ColourValue(0.628281f, 0.555802f, 0.366065f, 5.0f));
 			paramsSecondPass->setNamedConstant("alpha", alpha);
+			paramsSecondPass->setNamedConstant("reflection", reflection);
+			paramsSecondPass->setNamedConstant("specularStrength", 1.5f);
 
 			paramsThirdPass->setNamedConstant("alpha", alpha);
+			paramsThirdPass->setNamedConstant("reflection", reflection);
+			//mat->getTechnique(0)->getPass("diffuse")->getTextureUnitState("DiffuseMap")->setTextureName("white_bg_1080p.jpg");
+
+			paramsFourthPass->setNamedConstant("alpha", alpha);
+			paramsFourthPass->setNamedConstant("reflection", reflection);
 		}
 	}
 	cube->setMaterialName(strMaterialName);
@@ -224,7 +281,7 @@ void CApplication::CreateCube(const Ogre::Vector3 & vPos, bool bHideFrontFace)
 	pNode->attachObject(cube);
 	pNode->setScale(Ogre::Vector3(1.0f));
 
-	pNode->setScale(pNode->getScale() - Ogre::Vector3(0.0005f));
+	pNode->setScale(pNode->getScale() - Ogre::Vector3(0.00008f));
 
 	iIndex++;
 }
