@@ -9,10 +9,10 @@ uniform vec4 diffuse;
 uniform vec4 specular;
 uniform float specularStrength;
 uniform float alpha;
-uniform float reflection;
 
 uniform float lightCastShadows;
 
+uniform sampler2D AttenuationMap;
 uniform sampler2D ShadowMap;
 
 in vec4 oPos;
@@ -42,12 +42,12 @@ void main()
 		vec3 vertexToLightSource = vec3(oPosLight.xyz - oPos.xyz);
 		lightDir = normalize(vertexToLightSource);
 		float distance = length(vertexToLightSource);
-		float r = clamp(distance/lightAttenuation.x, 0.0, 1.0);
-		attenuation = 1.0 / ( 1.0 + 25.0 * r * r);
+		distance = clamp(distance/lightAttenuation.x, 0.0, 1.0);
+		attenuation = 1.0 / ( 1.0 + 25.0 * distance * distance);
 	}
 	
     float diff = max(0.0, dot(normal, lightDir));
-    vec3 colorDiffuse = diff * lightDiffuse.rgb * diffuse.rgb * attenuation;
+    vec3 colorDiffuse = diff * lightDiffuse.rgb * diffuse.rgb * vec3(attenuation);
 	
 	vec3 colorSpecular = vec3(0.0);
 	if(specular.a > 0.0)
@@ -69,7 +69,8 @@ void main()
         float cosInnerConeAngle = lightParams.x;
         float cosOuterConeAngle = lightParams.y;
         float cosInnerMinusOuterAngle = cosInnerConeAngle - cosOuterConeAngle;
-        colorSpotLight *= clamp((cosCurAngle - cosOuterConeAngle)/cosInnerMinusOuterAngle, 0.0, 1.0);
+        //colorSpotLight *= clamp((cosCurAngle - cosOuterConeAngle)/cosInnerMinusOuterAngle, 0.0, 1.0);
+		colorSpotLight *= smoothstep(0.0, 1.0, (cosCurAngle - cosOuterConeAngle)/cosInnerMinusOuterAngle);
     }
 	
 	// Shadow

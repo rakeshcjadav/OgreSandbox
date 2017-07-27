@@ -1,0 +1,4 @@
+fragment_program ambient_ps glsl
+{
+    source ambient_ps.glsl
+}

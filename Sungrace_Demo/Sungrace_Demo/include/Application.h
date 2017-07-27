@@ -14,6 +14,13 @@ public:
 private:
 	void							CreateScene();
 	void							CreateCube(const Ogre::Vector3 & vPos, bool bHideFrontFace = false, float fAlpha = 1.0f);
+	void							CreateCubeFromPlanes();
+	void							LoadCubeFace(Ogre::Vector3 pt1,
+													Ogre::Vector3 pt2,
+													Ogre::Vector3 pt3,
+													std::string sFace,
+													Ogre::String sCubeFaceMat);
+	void							LoadCubeEdges();
 	Ogre::String					GetMediaPath();
 
 private:

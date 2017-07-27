@@ -1,0 +1,4 @@
+fragment_program outline_ps glsl
+{
+    source outline_ps.glsl
+}

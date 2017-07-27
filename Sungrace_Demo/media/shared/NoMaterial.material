@@ -89,6 +89,8 @@ material NoMaterial
 
 				param_named ShadowMap int 0
 				
+				param_named AttenuationMap int 1
+				
 				param_named diffuse float4 1.0 1.0 1.0 1.0
 				param_named specular float4 0.0 0.0 0.0 1.0
 				param_named specularStrength float 0.2
@@ -103,6 +105,12 @@ material NoMaterial
 				max_anisotropy 16
 				tex_address_mode border
 				tex_border_colour 1 1 1
+			}
+			
+			texture_unit AttenuationMap
+			{
+				texture attenuation_spotlight.jpg 2d 0
+				tex_address_mode border
 			}
 		}
 		
@@ -130,7 +138,7 @@ material NoMaterial
 				texture border_rect.png 2d
 				//rotate 180
 				tex_coord_set 0
-				tex_address_mode border
+				tex_address_mode clamp
 				filtering linear linear linear
 			}
 		}

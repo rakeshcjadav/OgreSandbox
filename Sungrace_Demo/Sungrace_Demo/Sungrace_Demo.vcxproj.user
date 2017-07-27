@@ -4,7 +4,7 @@
     <LocalDebuggerWorkingDirectory>$(ProjectDir)..\run\$(Configuration)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerEnvironment>MEDIA_PATH=$(ProjectDir)../media/</LocalDebuggerEnvironment>
-    <LocalDebuggerCommandArguments>-sunlight false -pointlights false</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>-sunlight true -pointlights false</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerWorkingDirectory>$(ProjectDir)..\run\$(Configuration)</LocalDebuggerWorkingDirectory>
