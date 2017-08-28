@@ -1,0 +1,27 @@
+material 3dk/outline
+{
+    technique
+    {
+        pass outline
+        {
+			lighting off
+			
+			depth_bias 5.0 5.0
+            
+			scene_blend alpha_blend
+
+            depth_check on
+            depth_write off
+			
+			vertex_program_ref outline_vs
+            {
+                param_named_auto u_worldViewMatrix worldview_matrix
+            }
+
+            fragment_program_ref outline_ps
+            {
+				param_named OutlineColor float4 1.0 1.0 1.0 1.0
+            }
+        }
+    }
+}

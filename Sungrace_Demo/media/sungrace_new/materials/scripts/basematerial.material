@@ -1,0 +1,209 @@
+// This is the base material which is being cloned programatically
+// to create new material instances.
+material baseMaterial
+{
+    technique
+    {
+        pass ambient
+        {
+            vertex_program_ref base_vs
+            {
+                param_named_auto u_matWorldViewProjMatrix worldviewproj_matrix
+            }
+
+            fragment_program_ref ambient_ps
+            {
+				param_named_auto u_lightAmbientColor ambient_light_colour
+				param_named u_constantAmbientColor float3 1.0 1.0 1.0
+				param_named u_alphaBlendFactor float 1.0
+				param_named_auto u_lightCount light_count
+	        }
+        }
+		
+		pass lighting
+        {
+			scene_blend add
+
+			// Iterate this pass once 
+			iteration 1 per_n_lights 4
+
+			// When using pas iterations, the following parameter
+			// limits the _total_ number of lights considered.
+			// From the manual:
+			// 
+			// "for example if you have 12 lights in range with an 
+			//  ’iteration once_per_light’ setup but your max_lights
+			//  is set to 4 for that pass, the pass will only iterate 
+			//  4 times."
+			max_lights 20
+
+			// Bias the geometry so that the outlines can be drawn on top.
+			//depth_bias 1.0 1.0
+
+			vertex_program_ref base_vs
+			{
+				param_named_auto u_matWorldMatrix world_matrix
+				param_named_auto u_matWorldViewMatrix worldview_matrix
+				param_named_auto u_matWorldViewProjMatrix worldviewproj_matrix
+
+				param_named_auto u_texViewProjMatrix0 texture_viewproj_matrix 0
+				param_named_auto u_texViewProjMatrix1 texture_viewproj_matrix 1
+				param_named_auto u_texViewProjMatrix2 texture_viewproj_matrix 2
+				param_named_auto u_texViewProjMatrix3 texture_viewproj_matrix 3
+				
+				// The world space position of the observer.
+				param_named_auto u_camera_position camera_position
+			}
+			
+			fragment_program_ref base_ps
+			{
+				param_named_auto u_numLights light_count
+				
+				param_named_auto u_castShadows0 light_casts_shadows 0
+				param_named_auto u_castShadows1 light_casts_shadows 1
+				param_named_auto u_castShadows2 light_casts_shadows 2
+				param_named_auto u_castShadows3 light_casts_shadows 3
+
+				// Shadow maps.
+				param_named u_shadowMap0 int 0
+				param_named u_shadowMap1 int 1
+				param_named u_shadowMap2 int 2
+				param_named u_shadowMap3 int 3
+			
+				// Material definitions.
+				param_named u_specular_exponent float4 1.0 1.0 1.0 0.0
+				param_named u_alphaBlendFactor float 1.0
+				param_named u_reflectivity float 1.0
+
+				// Shadow casting spotlight parameters.
+				param_named_auto u_lightParameters0 spotlight_params 0
+				param_named_auto u_lightParameters1 spotlight_params 1
+				param_named_auto u_lightParameters2 spotlight_params 2
+				param_named_auto u_lightParameters3 spotlight_params 3
+				param_named_auto u_lightPositionWorldSpace0 light_position 0
+				param_named_auto u_lightPositionWorldSpace1 light_position 1
+				param_named_auto u_lightPositionWorldSpace2 light_position 2
+				param_named_auto u_lightPositionWorldSpace3 light_position 3
+				param_named_auto u_lightDirection0 light_direction 0
+				param_named_auto u_lightDirection1 light_direction 1
+				param_named_auto u_lightDirection2 light_direction 2
+				param_named_auto u_lightDirection3 light_direction 3
+				param_named_auto u_lightDiffuseColor0 light_diffuse_colour 0
+				param_named_auto u_lightDiffuseColor1 light_diffuse_colour 1
+				param_named_auto u_lightDiffuseColor2 light_diffuse_colour 2
+				param_named_auto u_lightDiffuseColor3 light_diffuse_colour 3
+				param_named_auto u_lightSpecularColor0 light_specular_colour 0
+				param_named_auto u_lightSpecularColor1 light_specular_colour 1
+				param_named_auto u_lightSpecularColor2 light_specular_colour 2
+				param_named_auto u_lightSpecularColor3 light_specular_colour 3
+				param_named_auto u_lightAttenuation0 light_attenuation 0
+				param_named_auto u_lightAttenuation1 light_attenuation 1
+				param_named_auto u_lightAttenuation2 light_attenuation 2
+				param_named_auto u_lightAttenuation3 light_attenuation 3
+
+				// The inverse dimensions of the shadow map.
+				param_named_auto u_invShadowMapSize inverse_texture_size 0
+			}
+			
+			texture_unit
+			{
+				content_type shadow
+				filtering anisotropic
+				max_anisotropy 16
+				tex_address_mode border
+				tex_border_colour 1 1 1
+			}
+			
+			texture_unit
+			{
+				content_type shadow
+				filtering anisotropic
+				max_anisotropy 16
+				tex_address_mode border
+				tex_border_colour 1 1 1
+			}
+			
+			texture_unit
+			{
+				content_type shadow
+				filtering anisotropic
+				max_anisotropy 16
+				tex_address_mode border
+				tex_border_colour 1 1 1
+			}
+			
+			texture_unit
+			{
+				content_type shadow
+				filtering anisotropic
+				max_anisotropy 16
+				tex_address_mode border
+				tex_border_colour 1 1 1
+			}
+        }
+		
+		pass diffuse
+		{
+			lighting off
+			scene_blend dest_colour zero
+
+           vertex_program_ref base_vs
+			{
+				param_named_auto u_matWorldMatrix world_matrix
+				param_named_auto u_matWorldViewMatrix worldview_matrix
+				param_named_auto u_matWorldViewProjMatrix worldviewproj_matrix
+				
+				param_named_auto u_matTextureMatrix texture_matrix 0
+			}
+
+            fragment_program_ref diffuse_ps
+            {
+				param_named u_hasDiffuseTexture int 0
+				param_named u_constantDiffuseColor float3 1.0 1.0 1.0
+				param_named u_uvScale float2 1.0 1.0
+				param_named u_alphaBlendFactor float 1.0
+				param_named u_reflectivity float 0.0
+				
+				// Material textures.
+				param_named u_diffuse int 0
+	        }
+			
+			texture_unit diffuse_tex
+			{
+				texture tex_0xA52E7097.png
+				filtering trilinear
+				tex_address_mode wrap
+			}
+		}
+		
+		pass environment
+		{
+			lighting off
+			scene_blend add
+
+			vertex_program_ref base_vs
+			{
+				param_named_auto u_matWorldMatrix world_matrix
+				param_named_auto u_matWorldViewMatrix worldview_matrix
+				param_named_auto u_matWorldViewProjMatrix worldviewproj_matrix
+				
+				// The world space position of the observer.
+				param_named_auto u_camera_position camera_position			
+			}
+			
+			fragment_program_ref env_ps
+			{
+				param_named u_env int 0
+				param_named u_alphaBlendFactor float 1.0
+				param_named u_reflectivity float 1.0
+			}
+			
+			texture_unit envmap
+			{
+				cubic_texture env.tga combinedUVW
+				tex_address_mode clamp
+				filtering linear linear linear
+			}
+		}
+    }
+}

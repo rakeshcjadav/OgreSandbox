@@ -1,0 +1,4 @@
+fragment_program diffuse_ps glsl
+{
+    source diffuse_ps.glsl
+}

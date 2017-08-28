@@ -1,0 +1,46 @@
+// Template materials for integrated depth shadows
+
+// caster.
+
+vertex_program pssm_vsm_caster_vp glsl
+{
+    source pssm_vsm_caster_vp.glsl
+
+    default_params
+    {
+        param_named_auto matWorldView worldview_matrix
+		param_named_auto matWorldViewProj worldviewproj_matrix
+    }
+}
+
+fragment_program pssm_vsm_caster_fp glsl
+{
+    source pssm_vsm_caster_fp.glsl
+
+    default_params
+    {
+        param_named_auto depthRange scene_depth_range
+    }
+}
+
+material pssm_vsm_caster
+{
+    technique
+    {
+        // all this will do is write depth and depth squared to red and green
+        pass
+        {
+            vertex_program_ref pssm_vsm_caster_vp
+            {
+            }
+
+            fragment_program_ref pssm_vsm_caster_fp
+            {
+            }
+        }
+    }
+}
+
+
+
+

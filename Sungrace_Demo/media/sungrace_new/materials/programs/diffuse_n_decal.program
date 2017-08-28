@@ -1,0 +1,4 @@
+fragment_program diffuse_n_decal_ps glsl
+{
+    source diffuse_n_decal_ps.glsl
+}

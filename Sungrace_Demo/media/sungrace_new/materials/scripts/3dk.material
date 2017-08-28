@@ -1,0 +1,152 @@
+vertex_program objectBaseVert_ambient glsl
+{
+    source vertexShader_ambient.glsl
+}
+
+fragment_program objectBaseFrag_ambient glsl
+{
+    source pixelShader_ambient.glsl
+}
+
+vertex_program objectBaseVert glsl
+{
+    source vertexShader.glsl
+}
+
+fragment_program objectBaseFrag glsl
+{
+    source pixelShader.glsl
+}
+
+//Vertex shader for 3dk/green Material.
+vertex_program vs glsl
+{
+   source vs.glsl
+}
+
+//Pixel shader for 3dk/green Material.
+fragment_program ps glsl
+{
+   source ps.glsl
+}
+
+//This Material is to render Cube used in Material application window to preview material sample.
+material 3dk/material
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+   
+			}
+		}
+	}
+}
+
+//This Materia is used for preview of Decorative Object in preview Window, can not use above script "3dk/material"
+//because it does not render decorative object correctly due to absence of shaders.
+material 3dk/green
+{
+    technique
+    {
+        pass
+        {
+            vertex_program_ref vs
+            {
+                param_named_auto mWorldMatrix world_matrix
+                param_named_auto mWorldViewMat worldview_matrix
+                param_named_auto mWorldViewProjMat worldviewproj_matrix
+            }
+
+            fragment_program_ref ps
+            {
+                 param_named mTexture0 int 0
+            }
+ 
+             texture_unit
+             {
+                 //texture Door.png
+				 texture_alias doorTextureName
+				 tex_address_mode wrap
+             }
+        }
+    }
+}
+
+//This Material is Used for Handle Preview.
+material 3dk/Handle
+{
+    technique
+    {
+        pass
+        {
+            vertex_program_ref vs
+            {
+                param_named_auto mWorldMatrix world_matrix
+                param_named_auto mWorldViewMat worldview_matrix
+                param_named_auto mWorldViewProjMat worldviewproj_matrix
+            }
+
+            fragment_program_ref ps
+            {
+                 param_named mTexture0 int 0
+            }
+ 
+             texture_unit
+             {
+                 texture dummy.png
+                 //tex_address_mode wrap
+				 tex_coord_set 0
+                 colour_op modulate
+             }
+        }
+    }
+}
+
+material 3dk/noLighting
+{
+    technique
+    {
+        pass
+        {
+            // Bias the geometry so that the outlines can be drawn on top.
+             depth_bias -1.0 -1.0
+
+            vertex_program_ref objectBaseVert
+            {
+                param_named_auto mWorldMatrix world_matrix
+                param_named_auto mWorldViewMat worldview_matrix
+                param_named_auto mWorldViewProjMat worldviewproj_matrix
+            }
+
+            fragment_program_ref objectBaseFrag
+            {
+                // These are set programatically.
+                //                param_named mHasDiffuseTexture int 0
+                //                param_named mHasDecalTexture int 0
+
+                // Disable lighting.
+                param_named u_enableLighting int 0
+ 
+                param_named mTexture0 int 0
+                param_named mDecalTexture0 int 1
+            }
+
+            texture_unit
+            {
+                texture_alias diffuseTextureName
+                tex_address_mode wrap
+//                tex_address_mode border
+//                tex_border_colour 0.0 0.0 0.0 0.0
+            }
+
+            texture_unit
+            {
+                texture_alias decalTextureName
+                filtering point point none
+            }
+        }
+    }
+}

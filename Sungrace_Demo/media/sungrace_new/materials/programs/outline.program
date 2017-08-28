@@ -1,0 +1,9 @@
+vertex_program outline_vs glsl
+{
+    source outline_vs.glsl
+}
+
+fragment_program outline_ps glsl
+{
+    source outline_ps.glsl
+}

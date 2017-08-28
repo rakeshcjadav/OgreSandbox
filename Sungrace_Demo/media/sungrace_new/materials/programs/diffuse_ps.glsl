@@ -2,13 +2,13 @@
 
 uniform vec2 u_uvScale;
 
-uniform vec3 u_eyePositionWorldSpace;
-
 // 1: use texture, 0: use constant color.
 uniform int u_hasDiffuseTexture;
 
 // The diffuse texture.
 uniform sampler2D u_diffuse;
+
+uniform int u_hasDecalTexture;
 
 // The constant diffuse color.
 uniform vec3 u_constantDiffuseColor;
@@ -24,9 +24,14 @@ out vec4 finalColor;
 
 void main()
 {
-    vec3 diffuse = u_hasDiffuseTexture == 0 ? 
-       u_constantDiffuseColor : texture2D(u_diffuse, u_uvScale*outUV).rgb;
-
-	diffuse = mix(diffuse, vec3(0.0), u_reflectivity);
-    finalColor = vec4(diffuse, 0.0);
+    vec4 colorDiffuse = vec4(0.0);
+	colorDiffuse.rgb = u_constantDiffuseColor;
+	
+    if (u_hasDiffuseTexture != 0)
+    {
+        colorDiffuse = texture2D(u_diffuse, u_uvScale*vec2(outUV.x, 1.0 - outUV.y));
+    }
+	
+	colorDiffuse.rgb = mix(colorDiffuse.rgb, vec3(0.0), u_reflectivity);
+    finalColor = colorDiffuse;
 }

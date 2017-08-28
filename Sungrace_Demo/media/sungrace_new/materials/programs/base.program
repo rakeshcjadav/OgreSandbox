@@ -1,0 +1,9 @@
+vertex_program base_vs glsl
+{
+    source base_vs.glsl
+}
+
+fragment_program base_ps glsl
+{
+    source base_ps.glsl
+}

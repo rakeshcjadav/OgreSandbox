@@ -1,0 +1,4 @@
+fragment_program transparency_ps glsl
+{
+    source transparency_ps.glsl
+}
