@@ -1,0 +1,4 @@
+fragment_program ambient_diffuse_decal_ps glsl
+{
+    source ambient_diffuse_decal_ps.glsl
+}

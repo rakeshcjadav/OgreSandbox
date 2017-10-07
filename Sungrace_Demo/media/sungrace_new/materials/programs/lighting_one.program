@@ -1,0 +1,9 @@
+vertex_program lighting_one_vs glsl
+{
+    source lighting_one_vs.glsl
+}
+
+fragment_program lighting_one_ps glsl
+{
+    source lighting_one_ps.glsl
+}

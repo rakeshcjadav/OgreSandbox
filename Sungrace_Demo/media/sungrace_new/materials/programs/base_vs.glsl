@@ -13,6 +13,10 @@ uniform mat4 u_texViewProjMatrix0;
 uniform mat4 u_texViewProjMatrix1;
 uniform mat4 u_texViewProjMatrix2;
 uniform mat4 u_texViewProjMatrix3;
+uniform mat4 u_texViewProjMatrix4;
+uniform mat4 u_texViewProjMatrix5;
+uniform mat4 u_texViewProjMatrix6;
+uniform mat4 u_texViewProjMatrix7;
 
 // Inputs 
 in vec4 vertex;
@@ -24,7 +28,7 @@ out vec3 outNormal;
 out vec4 outVertex;
 out vec2 outUV;
 out vec4 outCameraPosition;
-out vec4 outPositionShadowLightSpace[4];
+out vec4 outPositionShadowLightSpace[8];
 
 void main()
 {
@@ -34,9 +38,13 @@ void main()
 	
 	// Calculate the position of vertex in light space for shadowing.
     outPositionShadowLightSpace[0] = u_texViewProjMatrix0 * outVertex;
-    outPositionShadowLightSpace[1] = u_texViewProjMatrix1 * outVertex;
+	outPositionShadowLightSpace[1] = u_texViewProjMatrix1 * outVertex;
     outPositionShadowLightSpace[2] = u_texViewProjMatrix2 * outVertex;
     outPositionShadowLightSpace[3] = u_texViewProjMatrix3 * outVertex;
+	outPositionShadowLightSpace[4] = u_texViewProjMatrix4 * outVertex;
+	outPositionShadowLightSpace[5] = u_texViewProjMatrix5 * outVertex;
+    outPositionShadowLightSpace[6] = u_texViewProjMatrix6 * outVertex;
+    outPositionShadowLightSpace[7] = u_texViewProjMatrix7 * outVertex;
 	
 	outVertex = outVertex/vec4(outVertex.w);
 	

@@ -31,26 +31,26 @@ out vec4 finalColor;
 void main()
 {
     vec4 colorDiffuse = vec4(1.0);
-	colorDiffuse.rgb = u_constantDiffuseColor;
+	colorDiffuse.rgb = mix(colorDiffuse.rgb, u_constantDiffuseColor, u_transparency.x);
 	colorDiffuse.a = u_transparency.x;
 	
-    if (u_hasDiffuseTexture != 0)
+    if (u_hasDiffuseTexture != 0 && u_transparency.x > 0.0)
     {
         vec4 colorDiffuseTexture = texture2D(u_diffuse, u_uvScale*vec2(outUV.x, 1.0 - outUV.y));
-        colorDiffuse = mix(colorDiffuse, colorDiffuseTexture, colorDiffuseTexture.a * u_transparency.y);
+        colorDiffuse.rgb = mix(colorDiffuse.rgb, colorDiffuseTexture.rgb, colorDiffuseTexture.a * u_transparency.x);
     }
 
     if (u_hasDecalTexture != 0)
     {
         vec4 colorDecal = texture2D(u_decal, u_uvScale*vec2(outUV.x, 1.0 - outUV.y));
-        if (colorDecal != vec4(0.0, 0.0, 0.0, 0.0))
-        {
-            colorDiffuse = mix(colorDiffuse, colorDecal, u_transparency.y);
-        }
+		colorDiffuse.rgb = colorDecal.rgb * colorDecal.a * u_transparency.y + 
+							colorDiffuse.rgb * (1.0 - colorDecal.a * u_transparency.y);
+		
+		colorDiffuse.a += colorDecal.a * u_transparency.y;
     }
 	
-	if ((u_isTransparent != 0) && (colorDiffuse.a < 0.1))
-       discard;
+	//if ((u_isTransparent != 0) && (colorDiffuse.a < 0.1))
+     //  discard;
 	
     finalColor = colorDiffuse;
 }

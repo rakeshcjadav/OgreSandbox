@@ -6,11 +6,19 @@ uniform float u_castShadows0;
 uniform float u_castShadows1;
 uniform float u_castShadows2;
 uniform float u_castShadows3;
+uniform float u_castShadows4;
+uniform float u_castShadows5;
+uniform float u_castShadows6;
+uniform float u_castShadows7;
 
 uniform sampler2D u_shadowMap0;
 uniform sampler2D u_shadowMap1;
 uniform sampler2D u_shadowMap2;
 uniform sampler2D u_shadowMap3;
+uniform sampler2D u_shadowMap4;
+uniform sampler2D u_shadowMap5;
+uniform sampler2D u_shadowMap6;
+uniform sampler2D u_shadowMap7;
 
 // .xyz = the specular color, .w = the specular exponent.
 uniform vec4 u_specular_exponent;
@@ -25,29 +33,55 @@ uniform vec4 u_lightParameters0;
 uniform vec4 u_lightParameters1;
 uniform vec4 u_lightParameters2;
 uniform vec4 u_lightParameters3;
+uniform vec4 u_lightParameters4;
+uniform vec4 u_lightParameters5;
+uniform vec4 u_lightParameters6;
+uniform vec4 u_lightParameters7;
 uniform vec4 u_lightPositionWorldSpace0;
 uniform vec4 u_lightPositionWorldSpace1;
 uniform vec4 u_lightPositionWorldSpace2;
 uniform vec4 u_lightPositionWorldSpace3;
+uniform vec4 u_lightPositionWorldSpace4;
+uniform vec4 u_lightPositionWorldSpace5;
+uniform vec4 u_lightPositionWorldSpace6;
+uniform vec4 u_lightPositionWorldSpace7;
 uniform vec4 u_lightDirection0;
 uniform vec4 u_lightDirection1;
 uniform vec4 u_lightDirection2;
 uniform vec4 u_lightDirection3;
+uniform vec4 u_lightDirection4;
+uniform vec4 u_lightDirection5;
+uniform vec4 u_lightDirection6;
+uniform vec4 u_lightDirection7;
 uniform vec4 u_lightDiffuseColor0;
 uniform vec4 u_lightDiffuseColor1;
 uniform vec4 u_lightDiffuseColor2;
 uniform vec4 u_lightDiffuseColor3;
+uniform vec4 u_lightDiffuseColor4;
+uniform vec4 u_lightDiffuseColor5;
+uniform vec4 u_lightDiffuseColor6;
+uniform vec4 u_lightDiffuseColor7;
 uniform vec4 u_lightSpecularColor0;
 uniform vec4 u_lightSpecularColor1;
 uniform vec4 u_lightSpecularColor2;
 uniform vec4 u_lightSpecularColor3;
+uniform vec4 u_lightSpecularColor4;
+uniform vec4 u_lightSpecularColor5;
+uniform vec4 u_lightSpecularColor6;
+uniform vec4 u_lightSpecularColor7;
 uniform vec4 u_lightAttenuation0;
 uniform vec4 u_lightAttenuation1;
 uniform vec4 u_lightAttenuation2;
 uniform vec4 u_lightAttenuation3;
+uniform vec4 u_lightAttenuation4;
+uniform vec4 u_lightAttenuation5;
+uniform vec4 u_lightAttenuation6;
+uniform vec4 u_lightAttenuation7;
 
 uniform vec4 u_invShadowMapSize;
 uniform vec3 u_eyePositionWorldSpace;
+
+uniform sampler2D u_diffuse;
 
 // Input from Fragment shader
 in vec4 outVertex;
@@ -57,7 +91,7 @@ in vec4 outCameraPosition;
 
 // The vertex position in the light space for every 
 // shadow casting light.
-in vec4 outPositionShadowLightSpace[4];
+in vec4 outPositionShadowLightSpace[8];
 
 // Output
 out vec4 finalColor;
@@ -104,10 +138,11 @@ vec3 ComputeLight(
     in vec3 lightDiffuseColor,
     in vec3 lightSpecularColor,
     in vec4 lightAttenuation,
-    sampler2D shadowMap,
+    in sampler2D shadowMap,
 	in float bCastShadows,
     in vec4 positionShadowLightSpace,
-	inout vec3 colorSpecular)
+	inout vec3 colorSpecular,
+	inout float colorShadow)
 {
 	vec3 normal = normalize(outNormal);
 	
@@ -129,8 +164,11 @@ vec3 ComputeLight(
 		vec3 vFragmentToLightSource = vec3(lightPositionWorldSpace.xyz - outVertex.xyz);
 		dirLightToFragment = normalize(vFragmentToLightSource);
 		float distance = length(vFragmentToLightSource);
-		distance = clamp(distance/lightAttenuation.x, 0.0, 1.0);
-		attenuation = 1.0 / ( 1.0 + 10.0 * distance * distance);
+		distance = distance/lightAttenuation.x;
+		if(distance == 0.0)
+			attenuation = 1.0;
+		else if(distance > 0.0)
+			attenuation = 1.0/(25.0 * distance * distance);
 	}
 	
     float diffuseComponent = max(0.0, dot(normal, dirLightToFragment));
@@ -150,7 +188,8 @@ vec3 ComputeLight(
 						specularComponent * 
 						lightSpecularColor.rgb * 
 						u_specular_exponent.rgb *
-						attenuation;
+						attenuation * 
+						u_alphaBlendFactor;
 	}
 	
 	// Spot light cone
@@ -168,12 +207,12 @@ vec3 ComputeLight(
 		if(bCastShadows > 0.0)
 		{
 			float depth = 0.001*length(lightPositionWorldSpace.xyz - outVertex.xyz);
-			float colorShadow = shadowPCF(shadowMap, positionShadowLightSpace, u_invShadowMapSize.xy, depth);		
-			colorSpotLight *= colorShadow;
+			float f = shadowPCF(shadowMap, positionShadowLightSpace, u_invShadowMapSize.xy, depth);		
+			colorSpotLight *= f;
 		}
 	}
 	
-	colorDiffuse = colorDiffuse * colorSpotLight * u_alphaBlendFactor * (1.0-u_reflectivity);
+	colorDiffuse = colorDiffuse * vec3(colorSpotLight * u_alphaBlendFactor * (1.0-u_reflectivity));
 	return colorDiffuse;
 }
 
@@ -181,6 +220,7 @@ void main()
 {
     vec3 colorLight = vec3(0.0);
 	vec3 colorSpecular = vec3(0.0);
+	float colorShadow = 1.0;
 
     // Light #0
     if (u_numLights > 0.5)
@@ -196,7 +236,8 @@ void main()
                 u_shadowMap0,
 				u_castShadows0,
                 outPositionShadowLightSpace[0],
-				colorSpecular);
+				colorSpecular,
+				colorShadow);
     }
 
     // Light #1
@@ -213,7 +254,8 @@ void main()
                 u_shadowMap1,
 				u_castShadows1,
                 outPositionShadowLightSpace[1],
-				colorSpecular);
+				colorSpecular,
+				colorShadow);
     }
 
     // Light #2
@@ -230,7 +272,8 @@ void main()
                 u_shadowMap2,
 				u_castShadows2,
                 outPositionShadowLightSpace[2],
-				colorSpecular);
+				colorSpecular,
+				colorShadow);
     }
 
     // Light #3
@@ -247,8 +290,82 @@ void main()
                 u_shadowMap3,
 				u_castShadows3,
                 outPositionShadowLightSpace[3],
-				colorSpecular);
+				colorSpecular,
+				colorShadow);
     }
 	
-	finalColor = vec4(colorLight + colorSpecular, 0.0);
+	// Light #4
+    if (u_numLights > 4.5)
+    {
+        colorLight.rgb += 
+            ComputeLight(
+                u_lightPositionWorldSpace4,
+                u_lightParameters4,
+                u_lightDirection4.xyz,
+                u_lightDiffuseColor4.rgb,
+                u_lightSpecularColor4.rgb,
+                u_lightAttenuation4,
+                u_shadowMap4,
+				u_castShadows4,
+                outPositionShadowLightSpace[4],
+				colorSpecular,
+				colorShadow);
+    }
+
+    // Light #5
+    if (u_numLights > 5.5)
+    {
+        colorLight += 
+            ComputeLight(
+                u_lightPositionWorldSpace5,
+                u_lightParameters5,
+                u_lightDirection5.xyz,
+                u_lightDiffuseColor5.rgb,
+                u_lightSpecularColor5.rgb,
+                u_lightAttenuation5,
+                u_shadowMap5,
+				u_castShadows5,
+                outPositionShadowLightSpace[5],
+				colorSpecular,
+				colorShadow);
+    }
+
+    // Light #6
+    if (u_numLights > 6.5)
+    {
+        colorLight += 
+            ComputeLight(
+                u_lightPositionWorldSpace6,
+                u_lightParameters6,
+                u_lightDirection6.xyz,
+                u_lightDiffuseColor6.rgb,
+                u_lightSpecularColor6.rgb,
+                u_lightAttenuation6,
+                u_shadowMap6,
+				u_castShadows6,
+                outPositionShadowLightSpace[6],
+				colorSpecular,
+				colorShadow);
+    }
+
+    // Light #7
+    if (u_numLights > 7.5)
+    {
+        colorLight +=
+            ComputeLight(
+                u_lightPositionWorldSpace7,
+                u_lightParameters7,
+                u_lightDirection7.xyz,
+                u_lightDiffuseColor7.rgb,
+                u_lightSpecularColor7.rgb,
+                u_lightAttenuation7,
+                u_shadowMap7,
+				u_castShadows7,
+                outPositionShadowLightSpace[7],
+				colorSpecular,
+				colorShadow);
+    }
+	
+	colorLight = colorLight + colorSpecular;
+	finalColor = vec4(colorLight * colorShadow, 0.0);
 }

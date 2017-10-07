@@ -1,16 +1,10 @@
-#version 150
+#version 330
 
 uniform float u_numLights;
 
 uniform float u_castShadows0;
-uniform float u_castShadows1;
-uniform float u_castShadows2;
-uniform float u_castShadows3;
 
 uniform sampler2D u_shadowMap0;
-uniform sampler2D u_shadowMap1;
-uniform sampler2D u_shadowMap2;
-uniform sampler2D u_shadowMap3;
 
 // .xyz = the specular color, .w = the specular exponent.
 uniform vec4 u_specular_exponent;
@@ -22,32 +16,26 @@ uniform float u_alphaBlendFactor;
 uniform float u_reflectivity;
 
 uniform vec4 u_lightParameters0;
-uniform vec4 u_lightParameters1;
-uniform vec4 u_lightParameters2;
-uniform vec4 u_lightParameters3;
 uniform vec4 u_lightPositionWorldSpace0;
-uniform vec4 u_lightPositionWorldSpace1;
-uniform vec4 u_lightPositionWorldSpace2;
-uniform vec4 u_lightPositionWorldSpace3;
 uniform vec4 u_lightDirection0;
-uniform vec4 u_lightDirection1;
-uniform vec4 u_lightDirection2;
-uniform vec4 u_lightDirection3;
 uniform vec4 u_lightDiffuseColor0;
-uniform vec4 u_lightDiffuseColor1;
-uniform vec4 u_lightDiffuseColor2;
-uniform vec4 u_lightDiffuseColor3;
 uniform vec4 u_lightSpecularColor0;
-uniform vec4 u_lightSpecularColor1;
-uniform vec4 u_lightSpecularColor2;
-uniform vec4 u_lightSpecularColor3;
 uniform vec4 u_lightAttenuation0;
-uniform vec4 u_lightAttenuation1;
-uniform vec4 u_lightAttenuation2;
-uniform vec4 u_lightAttenuation3;
 
 uniform vec4 u_invShadowMapSize;
 uniform vec3 u_eyePositionWorldSpace;
+
+uniform vec2 u_uvScale;
+
+uniform int u_hasDiffuseTexture;
+uniform sampler2D u_diffuse;
+
+uniform int u_hasDecalTexture;
+uniform sampler2D u_decal;
+
+// .x = transparency for object.
+// .y = transparency for pattern.
+uniform vec2 u_transparency;
 
 // Input from Fragment shader
 in vec4 outVertex;
@@ -57,7 +45,7 @@ in vec4 outCameraPosition;
 
 // The vertex position in the light space for every 
 // shadow casting light.
-in vec4 outPositionShadowLightSpace[4];
+in vec4 outPositionShadowLightSpace;
 
 // Output
 out vec4 finalColor;
@@ -83,7 +71,7 @@ shadowPCF(
           texture2D(shadowMap, vec2(uv.x - o.x, uv.y + o.y)).rg +
           texture2D(shadowMap, vec2(uv.x + o.x, uv.y - o.y)).rg;
       moments /= 9.0;
-
+	  
       float litFactor = (depth <= moments.x ? 1.0 : 0.0);
 
       // standard variance shadow mapping code
@@ -104,12 +92,16 @@ vec3 ComputeLight(
     in vec3 lightDiffuseColor,
     in vec3 lightSpecularColor,
     in vec4 lightAttenuation,
-    sampler2D shadowMap,
+    in sampler2D shadowMap,
 	in float bCastShadows,
     in vec4 positionShadowLightSpace,
-	inout vec3 colorSpecular)
+	inout vec3 colorSpecular,
+	inout float colorShadow)
 {
 	vec3 normal = normalize(outNormal);
+	
+	if(gl_FrontFacing == false)
+		normal *= vec3(-1.0);
 	
 	// diffuse component
 	vec3 dirLightToFragment = vec3(1.0);
@@ -126,8 +118,11 @@ vec3 ComputeLight(
 		vec3 vFragmentToLightSource = vec3(lightPositionWorldSpace.xyz - outVertex.xyz);
 		dirLightToFragment = normalize(vFragmentToLightSource);
 		float distance = length(vFragmentToLightSource);
-		distance = clamp(distance/lightAttenuation.x, 0.0, 1.0);
-		attenuation = 1.0 / ( 1.0 + 25.0 * distance * distance);
+		distance = distance/lightAttenuation.x;
+		if(distance == 0.0)
+			attenuation = 1.0;
+		else if(distance > 0.0)
+			attenuation = 1.0/(25.0 * distance * distance);
 	}
 	
     float diffuseComponent = max(0.0, dot(normal, dirLightToFragment));
@@ -147,7 +142,8 @@ vec3 ComputeLight(
 						specularComponent * 
 						lightSpecularColor.rgb * 
 						u_specular_exponent.rgb *
-						attenuation;
+						attenuation * 
+						u_alphaBlendFactor;
 	}
 	
 	// Spot light cone
@@ -165,12 +161,12 @@ vec3 ComputeLight(
 		if(bCastShadows > 0.0)
 		{
 			float depth = 0.001*length(lightPositionWorldSpace.xyz - outVertex.xyz);
-			float colorShadow = shadowPCF(shadowMap, positionShadowLightSpace, u_invShadowMapSize.xy, depth);		
-			colorSpotLight *= colorShadow;
+			float f = shadowPCF(shadowMap, positionShadowLightSpace, u_invShadowMapSize.xy, depth);		
+			colorSpotLight *= f;
 		}
 	}
 	
-	colorDiffuse = colorDiffuse * colorSpotLight * u_alphaBlendFactor * (1.0-u_reflectivity);
+	colorDiffuse = colorDiffuse * vec3(colorSpotLight * (1.0-u_reflectivity));
 	return colorDiffuse;
 }
 
@@ -178,74 +174,36 @@ void main()
 {
     vec3 colorLight = vec3(0.0);
 	vec3 colorSpecular = vec3(0.0);
-
-    // Light #0
-    if (u_numLights > 0.5)
+	float colorShadow = 1.0;
+	
+	float fAlpha = u_transparency.x;
+	
+	if (u_hasDiffuseTexture != 0 && u_transparency.x > 0.0)
     {
-        colorLight.rgb += 
-            ComputeLight(
-                u_lightPositionWorldSpace0,
-                u_lightParameters0,
-                u_lightDirection0.xyz,
-                u_lightDiffuseColor0.rgb,
-                u_lightSpecularColor0.rgb,
-                u_lightAttenuation0,
-                u_shadowMap0,
-				u_castShadows0,
-                outPositionShadowLightSpace[0],
-				colorSpecular);
-    }
-
-    // Light #1
-    if (u_numLights > 1.5)
-    {
-        colorLight += 
-            ComputeLight(
-                u_lightPositionWorldSpace1,
-                u_lightParameters1,
-                u_lightDirection1.xyz,
-                u_lightDiffuseColor1.rgb,
-                u_lightSpecularColor1.rgb,
-                u_lightAttenuation1,
-                u_shadowMap1,
-				u_castShadows1,
-                outPositionShadowLightSpace[1],
-				colorSpecular);
-    }
-
-    // Light #2
-    if (u_numLights > 2.5)
-    {
-        colorLight += 
-            ComputeLight(
-                u_lightPositionWorldSpace2,
-                u_lightParameters2,
-                u_lightDirection2.xyz,
-                u_lightDiffuseColor2.rgb,
-                u_lightSpecularColor2.rgb,
-                u_lightAttenuation2,
-                u_shadowMap2,
-				u_castShadows2,
-                outPositionShadowLightSpace[2],
-				colorSpecular);
-    }
-
-    // Light #3
-    if (u_numLights > 3.5)
-    {
-        colorLight +=
-            ComputeLight(
-                u_lightPositionWorldSpace3,
-                u_lightParameters3,
-                u_lightDirection3.xyz,
-                u_lightDiffuseColor3.rgb,
-                u_lightSpecularColor3.rgb,
-                u_lightAttenuation3,
-                u_shadowMap3,
-				u_castShadows3,
-                outPositionShadowLightSpace[3],
-				colorSpecular);
+        fAlpha *= texture2D(u_diffuse, u_uvScale*vec2(outUV.x, 1.0 - outUV.y)).a;
     }
 	
-	finalColor = vec4(colorLight + colorSpecular, 0.0);
+	if (u_hasDecalTexture != 0)
+    {
+       float fDecalAlpha = texture2D(u_decal, u_uvScale*vec2(outUV.x, 1.0 - outUV.y)).a;
+	   fAlpha = clamp(fAlpha + fDecalAlpha * u_transparency.y, 0.0, 1.0);
+    }
+
+	colorLight.rgb += 
+		ComputeLight(
+			u_lightPositionWorldSpace0,
+			u_lightParameters0,
+			u_lightDirection0.xyz,
+			u_lightDiffuseColor0.rgb,
+			u_lightSpecularColor0.rgb,
+			u_lightAttenuation0,
+			u_shadowMap0,
+			u_castShadows0,
+			outPositionShadowLightSpace,
+			colorSpecular,
+			colorShadow);
+			
+	
+	colorLight = colorLight + colorSpecular;
+	finalColor = vec4(colorLight * colorShadow * fAlpha, 0.0);
 }
